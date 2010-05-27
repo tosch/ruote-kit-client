@@ -10,6 +10,11 @@ describe RuoteKit::Client::Agent do
     @agent.url.to_s.should == 'http://localhost:8080/'
   end
 
+  it "should respect prefixes in its url" do
+    @agent = RuoteKit::Client::Agent.new( 'http://localhost:8080/_ruote' )
+    @agent.send(:jig).options[:prefix].should == '/_ruote'
+  end
+
   describe "launching processes" do
     it "should do so for valid launch items" do
       li = RuoteKit::Client::LaunchItem.new

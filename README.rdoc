@@ -15,7 +15,7 @@ access it.
 
   require 'ruote-kit/client'
   
-  client = RuoteKit::Client( 'http://localhost:8080' )
+  client = RuoteKit::Client( 'http://localhost:9292/_ruote' )
 
 Now you can interact with ruote-kit
 

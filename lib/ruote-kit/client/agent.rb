@@ -143,7 +143,7 @@ module RuoteKit
       private
 
       def jig
-        @jig ||= Rufus::Jig::Http.new( @url.host, @url.port )
+        @jig ||= Rufus::Jig::Http.new( @url.host, @url.port, {:prefix => (@url.path.empty? || @url.path == '/') ? nil : @url.path } )
       end
 
       def put_workitem(wfid, expid, data)
