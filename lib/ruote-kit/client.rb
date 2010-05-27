@@ -1,4 +1,5 @@
 require 'rufus-jig'
+require 'cgi'
 
 module RuoteKit
   # Shortcut to RuoteKit::Client::Agent

@@ -11,8 +11,19 @@ describe RuoteKit::Client::Agent do
   end
 
   it "should respect prefixes in its url" do
-    @agent = RuoteKit::Client::Agent.new( 'http://localhost:8080/_ruote' )
-    @agent.send(:jig).options[:prefix].should == '/_ruote'
+    @agent = RuoteKit::Client::Agent.new( 'http://localhost:8080/_ruote/' )
+
+    @agent.path.should == '/_ruote'
+
+    mock_request(
+      @agent,
+      :get,
+      "/_ruote/workitems",
+      nil,
+      { :accept => 'application/json', :params => {} },
+      {"workitems"=>[{"fei"=> {"class"=>"Ruote::FlowExpressionId", "engine_id"=>"engine", "wfid"=>"20091204-bojupuraju", "expid"=>"0_0_0"}, "participant_name"=>"nada", "fields"=>{"params"=>{"activity"=>"REST :)", "ref"=>"nada"}}, "links"=>[{"href"=>"/processes/20091204-bojupuraju", "rel"=>"http://ruote.rubyforge.org/rels.html#process"}, {"href"=>"/expressions/20091204-bojupuraju", "rel"=>"http://ruote.rubyforge.org/rels.html#expressions"}]}]}
+    )
+    @agent.workitems
   end
 
   describe "launching processes" do
@@ -278,6 +289,36 @@ describe RuoteKit::Client::Agent do
       workitems.should_not be_empty
       workitems.first.should be_a_kind_of( RuoteKit::Client::Workitem )
       workitems.first.agent.should_not be_nil
+    end
+
+    it "should filter workitems by field values which are simple strings" do
+      mock_request(
+        @agent,
+        :get,
+        "/workitems",
+        nil,
+        { :accept => 'application/json', :params => {'foo' => 'bar'} },
+        {"workitems"=>[{"fei"=>{"class"=>"Ruote::FlowExpressionId", "engine_id"=>"engine", "wfid"=>"20091204-bojupuraju", "expid"=>"0_0_0"}, "participant_name"=>"nada", "fields"=>{"foo"=>"bar","moo"=>101,"params"=>{"activity"=>"REST :)", "ref"=>"nada"}}, "links"=>[{"href"=>"/processes/20091204-bojupuraju", "rel"=>"http://ruote.rubyforge.org/rels.html#process"}, {"href"=>"/expressions/20091204-bojupuraju", "rel"=>"http://ruote.rubyforge.org/rels.html#expressions"}]}]}
+      )
+
+      workitems = @agent.workitems(:fields => {:foo => 'bar'})
+      workitems.should_not be_empty
+      workitems.first.should be_a_kind_of( RuoteKit::Client::Workitem )
+    end
+
+    it "should filter workitems by field values which are numbers" do
+      mock_request(
+        @agent,
+        :get,
+        "/workitems",
+        nil,
+        { :accept => 'application/json', :params => {"moo" => '%7B%22value%22%3A101%7D'} },
+        {"workitems"=>[{"fei"=>{"class"=>"Ruote::FlowExpressionId", "engine_id"=>"engine", "wfid"=>"20091204-bojupuraju", "expid"=>"0_0_0"}, "participant_name"=>"nada", "fields"=>{"foo"=>"bar","moo"=>101,"params"=>{"activity"=>"REST :)", "ref"=>"nada"}}, "links"=>[{"href"=>"/processes/20091204-bojupuraju", "rel"=>"http://ruote.rubyforge.org/rels.html#process"}, {"href"=>"/expressions/20091204-bojupuraju", "rel"=>"http://ruote.rubyforge.org/rels.html#expressions"}]}]}
+      )
+
+      workitems = @agent.workitems(:fields => {:moo => 101})
+      workitems.should_not be_empty
+      workitems.first.should be_a_kind_of( RuoteKit::Client::Workitem )
     end
   end
 
